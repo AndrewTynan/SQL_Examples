@@ -1,6 +1,6 @@
 
-# 550. Game Play Analysis IV
-# users who login on the day after their join date? 
+-- 550. Game Play Analysis IV
+-- users who login on the day after their join date? 
 WITH cte as ( 
 Select 
     player_id, 
@@ -12,8 +12,8 @@ Select
 ) 
 
 
-# 619. Biggest Single Number
-# Find the largest single number. If there is no single number, report null.
+-- 619. Biggest Single Number
+-- Find the largest single number. If there is no single number, report null.
 WITH cte as ( 
 Select 
     num, 
@@ -27,7 +27,7 @@ Select
     Where num_cnt = 1 
 
 
-# community answer 
+-- community answer 
 SELECT MAX(num) AS num
 FROM (
     SELECT num
@@ -36,18 +36,16 @@ FROM (
     HAVING COUNT(num) = 1
 ) AS unique_numbers;
 
-# community answer 
+-- community answer 
 Select (SELECT num 
-			FROM MyNumbers 
-			GROUP BY num 
-			HAVING COUNT(num) = 1 
-			ORDER BY num 
-			DESC LIMIT 1) AS num;
+            FROM MyNumbers 
+            GROUP BY num 
+            HAVING COUNT(num) = 1 
+            ORDER BY num 
+            DESC LIMIT 1) AS num;
 
 
-
-
-# seat excchange 
+-- seat excchange 
 SELECT id, 
        CASE 
          WHEN mod(id, 2) = 1 AND lead(id) OVER(ORDER BY id) IS NOT NULL THEN lead(student) OVER(ORDER BY id)
@@ -56,8 +54,6 @@ SELECT id,
        END AS student
 FROM seat
 ORDER BY id;
-
-
 
 
 Select 
@@ -69,13 +65,11 @@ Select
     From cte 
 
 
-585. Investments in 2016
+/* 585. Investments in 2016
 Get the sum of all total investment values in 2016 , for all policyholders who:
-	have the same tiv_2015 value as one or more other policyholders, and
-	are not located in the same city as any other policyholder (i.e., the (lat, lon) attribute pairs must be unique).
-Round tiv_2016 to two decimal places.
-
-
+    have the same tiv_2015 value as one or more other policyholders, and
+    are not located in the same city as any other policyholder (i.e., the (lat, lon) attribute pairs must be unique).
+Round tiv_2016 to two decimal places. */ 
 select
     round(sum(tiv_2016), 2) as tiv_2016
 from
@@ -90,15 +84,14 @@ from
 where tiv_2015_cnt > 1 and location_cnt = 1
 
 
-SELECT ROUND(SUM(tiv_2016), 2) AS tiv_2016
+SELECT 
+	ROUND(SUM(tiv_2016), 2) AS tiv_2016
 FROM insurance
 WHERE tiv_2015 IN (SELECT tiv_2015 FROM insurance GROUP BY tiv_2015 HAVING COUNT(*) > 1)
 AND (lat, lon) IN (SELECT lat, lon FROM insurance GROUP BY lat, lon HAVING COUNT(*) = 1)
 
 
-
-
-# Write your MySQL query statement below
+-- Write your MySQL query statement below
 WITH Insurance_2 as ( 
 Select 
     a.pid, 
@@ -123,15 +116,14 @@ Select
 
 Select 
     
-    # ROUND(sum(tiv_2016),2) as tiv_2016
+    -- ROUND(sum(tiv_2016),2) as tiv_2016
     from Insurance a 
     left join same_city_pid b 
         on a.pid = b.pid
     Where b.pid is null 
 
 
-
-Table: Employee
+/* Table: Employee
 
 +-------------+---------+
 | Column Name | Type    |
@@ -145,10 +137,8 @@ id is the primary key (column with unique values) for this table.
 Each row of this table indicates the name of an employee, their department, and the id of their manager.
 If managerId is null, then the employee does not have a manager.
 No employee will be the manager of themself.
- 
 
 Write a solution to find managers with at least five direct reports.
-
 Return the result table in any order.
 
 The result format is in the following example.
@@ -172,8 +162,7 @@ Output:
 | name |
 +------+
 | John |
-+------+
-
++------+ */ 
 
 SELECT E1.name
 FROM Employee E1
@@ -211,9 +200,7 @@ GROUP BY e1.id
 HAVING COUNT(e2.name) >= 5;
 
 
-
-
-https://leetcode.com/problems/customers-who-bought-all-products/submissions/
+-- https://leetcode.com/problems/customers-who-bought-all-products/submissions/
 
 WITH cust as ( 
 Select 
@@ -272,12 +259,9 @@ having  cus_total_products = total_products
 Select customer_id from main 
 
 
+-- https://leetcode.com/problems/second-highest-salary/submissions/
 
-
-https://leetcode.com/problems/second-highest-salary/submissions/
-
-
-# 2nd highest 
+-- 2nd highest 
 SELECT MAX(Salary) AS SecondHighestSalary 
 FROM Employee
 WHERE Salary NOT IN (
@@ -299,23 +283,19 @@ Select
     WHERE salary_rnk = 2    
 
 
-
-
-
-
-
-WITH cte1 as
-(SELECT visited_on, SUM(amount) as total_amount
+WITH cte1 as (
+SELECT visited_on, SUM(amount) as total_amount
 FROM Customer
-GROUP BY visited_on),
-
-cte2 as 
-(SELECT 
+GROUP BY visited_on
+)
+,cte2 as (
+SELECT 
         visited_on, 
         SUM(total_amount) OVER(ORDER BY visited_on ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) as amount, 
         ROUND(AVG(total_amount) OVER(ORDER BY visited_on ROWS BETWEEN 6 PRECEDING AND CURRENT ROW),2) as average_amount
-FROM cte1)
-
+FROM cte1
+) 
+	
 SELECT *
 FROM cte2
 WHERE visited_on >= (SELECT visited_on FROM Customer ORDER BY visited_on LIMIT 1) + 6
