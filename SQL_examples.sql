@@ -1,9 +1,19 @@
 
+EXTRACT
+DATEDIFF
+
+    DATEDIFF(a.RecordDate, b.RecordDate) = 1
+    
+DATE_ADD, DATE_SUB
+DATE_TRUNC
+
+
+
 -- TOP N 
 select * from table order by Num descc limit 25
 
-    
--- 4 to 9 rows 
+
+# 4 to 9 rows 
 SELECT 
     employee_id, first_name, last_name
 FROM
@@ -11,8 +21,7 @@ FROM
 ORDER BY first_name
 LIMIT 5 OFFSET 3;
 
-
--- top 1 
+# top 1 
 SELECT 
     employee_id, 
     first_name, 
@@ -24,8 +33,7 @@ ORDER BY
 OFFSET 0 ROWS
 FETCH NEXT 1 ROWS ONLY;
 
-
--- second highest 
+# second highest 
 SELECT 
     employee_id, 
     first_name, 
@@ -37,10 +45,8 @@ ORDER BY
   salary DESC
 LIMIT 1 OFFSET 1;
 
-
-/* if there are 2 or more ppl with the second highest salary 
-use a subquery to get the salary that is second highest and fillter on it */ 
-
+# if there are 2 or more ppl with the second highest salary 
+# use a subquery to get the salary that is second highest and fillter on it 
 SELECT 
     employee_id, first_name, last_name, salary
 FROM
@@ -53,10 +59,8 @@ WHERE
         ORDER BY salary DESC
         LIMIT 1 , 1);
 
-
-/* /https://www.interviewquery.com/questions/top-5-turnover-risk
-Given two tables, employees and projects, find the five lowest-paid employees who have completed at least three projects */ 
-
+#https://www.interviewquery.com/questions/top-5-turnover-risk
+# Given two tables, employees and projects, find the five lowest-paid employees who have completed at least three projects.
 SELECT 
     emp.id as employee_id
 FROM employees emp 
@@ -74,7 +78,8 @@ FROM employees
 GROUP BY department
 HAVING AVG(salary) > (
   SELECT AVG(salary)
-  FROM employees)
+  FROM employees
+);
 
 
 -- Correlated Subquery
@@ -85,10 +90,9 @@ WHERE product_price > (SELECT AVG(product_price)
                             WHERE p.category_id = category_id)
 
 
-/* List the products that have been sold in all cities where the company operates.
-In essence, this query finds products that do not have a single city where they have not been sold. 
-These are the products that have been sold in all  cities where the company operates. */ 
-
+-- List the products that have been sold in all cities where the company operates.
+--In essence, this query finds products that do not have a single city where they have not been sold. 
+--These are the products that have been sold in all  cities where the company operates.
 SELECT p.product_name
 FROM products p
 WHERE NOT EXISTS (
@@ -100,7 +104,7 @@ WHERE NOT EXISTS (
     WHERE s.product_id = p.product_id
     AND s.city_id = c.city_id
   )
-)
+);
 
  -- Find customers who have made a purchase every month for the last six months
 SELECT customer_id
@@ -114,14 +118,16 @@ HAVING COUNT(DISTINCT EXTRACT(YEAR_MONTH FROM purchase_date)) = 6;
 SELECT
   customer_id,
   MAX(purchase_amount) AS max_purchase_amount
-FROM purchases
-GROUP BY customer_id
-ORDER BY max_purchase_amount DESC
+FROM
+  purchases
+GROUP BY
+  customer_id
+ORDER BY
+  max_purchase_amount DESC
 LIMIT 10;
 
-
-/* mod division 
-https://leetcode.com/problems/not-boring-movies/ */ 
+# mod division 
+#https://leetcode.com/problems/not-boring-movies/
 Select 
     *
     From Cinema
@@ -130,7 +136,8 @@ Select
 order by rating desc 
 
 
---  having examples 
+
+# having 
 SELECT product_name 
 FROM products 
 GROUP BY product_name 
@@ -149,9 +156,22 @@ group by class
 having count(student) >= 5 
 
 
-/* Last Transaction (for each day)
-https://www.interviewquery.com/questions/last-transaction */ 
-    
+
+https://www.interviewquery.com/questions/customer-orders
+Write a query to identify customers who placed more than three transactions each in both 2019 and 2020.
+select 
+    name as customer_name
+    from transactions t 
+    join users u 
+        on t.user_id = u.id
+group by name   
+having COUNT(IF(year(t.created_at) = '2019',  t.id, null)) > 3 
+and    COUNT(IF(year(t.created_at) = '2020',  t.id, null)) > 3 
+
+
+
+Last Transaction (for each day)
+https://www.interviewquery.com/questions/last-transaction
 WITH cte as ( 
 select 
     created_at, 
@@ -169,11 +189,10 @@ Select
     Where daily_trx_rev_rank = 1 
 
 
--- basic aggregations 
+# basic aggregations 
 
-/* https://leetcode.com/problems/top-travellers/submissions/
-good reminder to group by primary key */ 
-    
+# https://leetcode.com/problems/top-travellers/submissions/
+-- good reminder to group by primary key 
 Select 
     u.name, 
     coalesce(sum(r.distance),0) as travelled_distance
@@ -184,13 +203,35 @@ group by u.id, u.name
 order by sum(distance) desc, u.name asc 
 
 
-select 
+  select 
       a.user_account_id, 
       count(distinct User_Game_Smry_Date) Days_Played,
       sum(BGS.Sess_Duration_In_Sec) Sess_Duration_In_Sec,
       sum(cast(BGS.Game_Play_Cnt as decimal(38,2))) Game_Play_Cnt,
       sum(cast(BGS.Game_Play_Duration_In_Sec as decimal(38,2))) Game_Play_Duration_In_Sec
 
+https://database.guide/how-make_date-works-in-postgresql/
+
+
+MAKEDATE(year, day)
+SELECT MAKEDATE(2017, 175);
+
+
+SELECT CONCAT("SQL ", "Tutorial ", "is ", "fun!") AS ConcatenatedString;
+
+
+DATEDIFF(date1, date2)
+Parameter Description
+date1, date2  Required. Two dates to calculate the number of days between. (date1 - date2)
+
+
+TIMESTAMPDIFF(MINUTE, start_dt, end_dt) as duration_minutes
+SELECT DATE_ADD("2017-06-15", INTERVAL 10 DAY);
+SELECT DATE_ADD("2017-06-15 09:34:21", INTERVAL -3 HOUR);
+SELECT DATE_ADD("2017-06-15 09:34:21", INTERVAL 15 MINUTE);
+
+DATE_FORMAT(trans_date, '%Y-%m') AS month, 
+DATE_FORMAT("2017-06-15", "%Y")
 
 Select 
     activity_date as day, 
@@ -200,27 +241,32 @@ Select
 group by 1 
 
 
--- active  status 
+
+# active  status 
 Select case when Date_Diff <= 30 then 'Active' 
         when Date_Diff > 30 then 'Reactivated'  
         when Date_Diff is null then 'New'
     else 'Other' 
       end Activity_Status, count(distinct user_account_id)        
-   from ( select distinct a.user_account_id, a.user_account_ss_code, a.Join_Date, 
-                    max(Event_Date) Max_Active_Date, (Join_Date - Max_Active_Date) Date_Diff
-         ) 
+   from 
+    ( select distinct a.user_account_id, a.user_account_ss_code, a.Join_Date, max(Event_Date) Max_Active_Date, (Join_Date - Max_Active_Date) Date_Diff
+    ) 
 
--- get crossover  
+
+
+
+
+# get crossover  
 SELECT base.Ea_Fiscal_Year_Nbr, pivot.Ea_Fiscal_Year_Nbr, COUNT(DISTINCT base.user_account_id) counts
     FROM
       (SELECT DISTINCT CAL.Ea_Fiscal_Year_Nbr, ORR.User_Account_Id
-          FROM revenue_tbl
+          FROM Origin_Pub.ORIGIN_REVENUE ORR 
           WHERE Valid_Order_Flag = 'Y'
           AND  order_date BETWEEN  '2011-01-01'  AND CURRENT_DATE 
       ) base
     JOIN
       (SELECT DISTINCT CAL.Ea_Fiscal_Year_Nbr, ORR.User_Account_Id 
-          FROM revenue_tbl ORR 
+          FROM Origin_Pub.ORIGIN_REVENUE ORR 
           WHERE Valid_Order_Flag = 'Y'
           AND order_date BETWEEN  '2011-01-01'  AND CURRENT_DATE
       ) pivot
@@ -229,7 +275,7 @@ GROUP BY 1,2
 ORDER BY 1,2     
 
 
--- 1.How many members ever worked at Microsoft prior to working at Google?
+1.How many members ever worked at Microsoft prior to working at Google?
 Select 
     count(distinct a.Member_id) as count
     from employee_info a 
@@ -240,7 +286,8 @@ Select
         and a.Year_Start < b.Year_Start
 
 
--- pivot wider and multi-crieria filter 
+
+# pivot wider and multi-crieria filter 
 WITH skils_plus as ( 
 SELECT 
       candidate_id
@@ -260,20 +307,20 @@ Select
 order by 1   
 
 
--- Confirmation Rate
+
+# Confirmation Rate
 SELECT 
-    round(count(DISTINCT case when signup_action = 'Confirmed' then user_id end) / 
-          cast(count(DISTINCT user_id) as decimal),2) as confirmation_rate
+round(count(DISTINCT case when signup_action = 'Confirmed' then user_id end) / cast(count(DISTINCT user_id) as decimal),2) as confirmation_rate
     From (SELECT
                 e.user_id 
               , t.signup_action
               FROM emails as e 
               LEFT JOIN texts as t
                 on e.email_id = t.email_id
-          ) a     
+        ) a     
 
 
--- users w/ $50+ spent on first transaction date 
+# users w/ $50+ spent on first transaction date 
 With first_transaction_date_tbl as ( 
 SELECT 
       user_id
@@ -300,7 +347,9 @@ Select
     From ftd_w_spend
 
 
--- employye w/ highest salery in each dept 
+
+
+# employye w/ highest salery in each dept 
 Select 
       d.name as Department 
     , e.name as Employee 
@@ -318,23 +367,25 @@ Select
         on e.DepartmentId = d.id 
 
 
--- write a query to get the distribution of the number of conversations created by each user by day in 2020? 
+
+# write a query to get the distribution of the number of conversations created by each user by day in 2020? 
 Select 
     msg_number, 
     count() as frequency 
-    FROM (Select 
-            user,
-            date, 
-            COUNT(user2) as msg_number, 
-            COUNT(DISTINCT user2) as unique_msg_number # this would be unique message recipients 
-            From messages 
-            Where year(date) = '2020'
-          GROUP BY user1, date 
-          ) 
+FROM (Select 
+        user,
+        date, 
+        COUNT(user2) as msg_number, 
+        COUNT(DISTINCT user2) as unique_msg_number # this would be unique message recipients 
+        From messages 
+        Where year(date) = '2020'
+      GROUP BY user1, date 
+      ) 
 GROUP BY msg_number
-    
 
--- https://leetcode.com/problems/product-price-at-a-given-date/
+
+
+# https://leetcode.com/problems/product-price-at-a-given-date/
 with base as ( 
 Select 
     product_id, 
@@ -364,7 +415,8 @@ Select
 group by 1,2 
 
 
--- https://www.interviewquery.com/questions/top-three-salaries
+
+# https://www.interviewquery.com/questions/top-three-salaries
 WITH cte as ( 
 select 
     concat(first_name, ' ', last_name) as employee_name, 
@@ -384,4 +436,12 @@ Select
     From cte 
     Where  dept_salary_rank <=  3 
 order by department_name, salary desc 
+
+
+
+
+
+
+
+
 

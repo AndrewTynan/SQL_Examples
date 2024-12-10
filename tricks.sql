@@ -310,4 +310,30 @@ where p1.employee_id = 3
 
 
 
-    
+https://www.interviewquery.com/questions/weighted-average-campaigns
+A marketing team wants to compute a weighted average score to measure the effectiveness of their past email campaigns. They want the weight of the open rate to be 0.3, and the weight of the click rate to be 0.7.
+Write a SQL query to calculate the weighted average for each campaign.
+SELECT 
+    campaign_name, 
+    ((num_opens *  .3) + (num_clicks    * .7)) / num_users as weighted_avg
+    FROM email_campaigns
+
+
+
+
+https://www.interviewquery.com/questions/ctr-by-age
+Given two tables, search_events and users, write a query to find the three age groups (bucketed by decade: age 0-9 falls into group 0, age 10-19 to group 1, …, 90-99 to group 9, with the endpoint included) with the highest clickthrough rate in 2021. If two or more groups have the same clickthrough rate, the older group should have priority.
+Hint: If a user that clicked the link on 1/1/2021 is 29 years old on that day and has a birthday tomorrow on 2/1/2021, they fall into the [20-29] category. If the same user clicked on another link on 2/1/2021, he turned 30 and will fall into the [30-39] category.
+
+SELECT 
+    TIMESTAMPDIFF(year, date(birthdate), date(search_time)) DIV 10 as age_group,
+    AVG(has_clicked) as ctr 
+    FROM search_events s 
+    join users u 
+        on s.user_id = u.id 
+    Where year(search_time) = 2021 
+group by age_group   
+order by 2 desc, 1      
+limit 3 
+
+

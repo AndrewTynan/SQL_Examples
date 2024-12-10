@@ -1,0 +1,53 @@
+
+
+Make sure any shared fields have alias reference!
+
+lag / lead window functions always have a row with a null value, need to account for this! 
+
+Ranking:
+	how is the rank being done? asc or desc? 
+	how do we treat repeated values? 
+
+Where cluase for top 3 is less than or equal to 
+	Where rank <= 3 	
+
+
+for bottom N questionns, just reverse the order by to desc 
+
+
+Ask questions, 
+	the Employee Salaries (ETL Error) on Interviewquery is a good example of needing to clarify what 'Assume the INSERT operation works with ID autoincrement.' menas? 
+
+
+when looking at overlaps
+	if there is a start_date and end_date 
+	need to compare both the start_date and end_date to the other start_date's and end_date's 
+        and (s1.start_date between s2.start_date and s2.end_date 
+        OR s1.end_date between s2.start_date and s2.end_date)
+
+select 
+    CASE WHEN s2.user_id IS NOT NULL THEN 1 ELSE 0 END overlap,
+    s1.user_id
+    from subscriptions s1 
+    left join subscriptions s2 
+        on s1.user_id != s2.user_id
+        and (s1.start_date between s2.start_date and s2.end_date 
+            OR s1.end_date between s2.start_date and s2.end_date)
+
+
+NULLS 
+think abbout nulls when making comparisons 
+Find the names of the customer that are not referred by the customer with id = 2.
+Select 
+    name 
+    from Customer 
+    Where referee_id != 2 
+        or referee_id IS NULL                     
+
+
+think about nulls in the case when comparsion 
+need to filter them out in the having or the next where clause 
+
+
+
+      

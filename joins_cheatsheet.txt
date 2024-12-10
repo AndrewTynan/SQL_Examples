@@ -1,0 +1,47 @@
+#SQL hashtag#JOINs Cheatsheet
+
+hashtag#INNER JOIN
+- Returns only matching rows from both tables
+- Most common type of join
+- Excludes non-matching records
+- Best for: Finding records that exist in both tables
+
+hashtag#LEFT JOIN (LEFT OUTER JOIN)
+- Returns all records from left table and matching records from right table
+- NULL values for non-matching right table records
+- Best for: Keeping all records from main table while getting optional related data
+
+hashtag#RIGHT JOIN (RIGHT OUTER JOIN)
+- Returns all records from right table and matching records from left table
+- NULL values for non-matching left table records
+- Best for: Same as LEFT JOIN but prioritizing right table
+
+hashtag#FULL JOIN (FULL OUTER JOIN)
+- Returns all records from both tables
+- NULL values for non-matching records on either side
+- Best for: Getting all data from both tables regardless of matches
+
+hashtag#CROSS JOIN
+- Returns Cartesian product of both tables
+- Every row from first table paired with every row from second table
+- No ON clause needed
+- Best for: Generating all possible combinations
+
+hashtag#Common JOIN Patterns
+
+hashtag#Multiple JOINs hashtag#Self JOIN hashtag#JOIN with Additional Conditions
+
+hashtag#Best Practices
+1. Always use table aliases for better readability
+2. Specify the join type explicitly (avoid implicit joins)
+3. Use meaningful join conditions
+4. Consider index usage for join columns
+5. Start with the largest table in the FROM clause
+6. Use WHERE clauses after joins for filtering
+
+hashtag#Common Pitfalls
+1. Forgetting to specify JOIN type (defaults to INNER)
+2. Missing join conditions leading to cartesian products
+3. Not handling NULL values properly
+4. Joining on wrong columns
+5. Using too many joins without proper indexing

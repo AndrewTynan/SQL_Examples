@@ -1,6 +1,6 @@
 
--- off-set union 
--- allows pivoting 
+# off-set union 
+# allows pivoting 
 select
     branch_id,
     sum(21_sales) as total_sales_2021,
@@ -20,8 +20,8 @@ from(select
 group by branch_id
 
 
--- self-join dates 
--- more compacct option than  window functions 
+# self-join dates 
+# more compacct option than  window functions 
 WITH cte AS (
     SELECT 
         a1.date,
@@ -36,21 +36,22 @@ WITH cte AS (
 )
 SELECT date, weighted_average
 FROM cte
-WHERE rnk > 2; -- this excluded the first two rows which had nulls, it was part of thte question 
+WHERE rnk > 2; # this excluded the first two rows which had nulls, it was part of thte question 
 
 
--- repeat instances of something, in this case repeat purchasers 
+# repeat instances of something, in this case repeat purchasers 
 Select count(user_id)
 from
     (Select user_id
     From transaction
     Group by user_id
-    Having count(distinct created_at) > 1 -- could change to count(distinct date(created_at)) to get those that respend on another date 
+    Having count(distinct created_at) > 1 # could change to count(distinct date(created_at)) to get those that respend on another date 
     ) as t1;
 
 
--- Audio Chat Success
--- https://www.interviewquery.com/questions/audio-chat-success 
+
+# Audio Chat Success
+# https://www.interviewquery.com/questions/audio-chat-success 
 WITH distinct_chats AS (
     SELECT 
         c.buyer_user_id 
@@ -107,7 +108,7 @@ order by distance_traveled desc
 
 
 -- Weighted Average With Missing Dates
--- https://www.interviewquery.com/questions/weighted-average-with-missing-dates
+--https://www.interviewquery.com/questions/weighted-average-with-missing-dates
 WITH acquisitions_w_prior_dates_prep as ( 
 SELECT 
     *, 
@@ -142,6 +143,8 @@ Select
     From final 
     Where weighted_average is not null 
 order by date    
+
+
 
 
 -- Branch Sales Pivot 
@@ -226,6 +229,7 @@ Select
     AND row_num = 2 
 
 
+
 -- career jumping 
 WITH cte1 as (
 SELECT 
@@ -276,11 +280,11 @@ order by 1,2
 
 
 
--- Rolling Average Steps
--- only include full trailing windows 
--- in this example, it's 3 rows 
+# Rolling Average Steps
+# only include full trailing windows 
+# in this example, it's 3 rows 
 
--- one way to do it is with datediff, but this requires multiple cals 
+# one way to do it is with datediff, but this requires multiple cals 
 WITH cte as ( 
 SELECT 
     user_id,  
@@ -303,7 +307,7 @@ Select
     AND two_days_diff = 2 
 
 
--- a cleaner way is to count the rows, in ths case the date 
+# a cleaner way is to count the rows, in ths case the date 
 WITH cte as ( 
 SELECT 
     user_id,  
@@ -322,3 +326,9 @@ Select
     avg_steps
     From cte     
     Where date_count = 3 
+
+        
+
+
+
+

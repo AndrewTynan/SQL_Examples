@@ -1,4 +1,70 @@
 
+
+https://www.interviewquery.com/questions/cumulative-distribution
+Given the two tables, write a SQL query that creates a cumulative distribution of the number of comments per user. Assume bin buckets class intervals of one.
+WITH cte as ( 
+SELECT 
+    u.id, 
+    coalesce(count(c.created_at),0) as comments 
+    FROM users u 
+    LEFT JOIN comments c 
+        on u.id = c.user_id 
+group by 1 
+) 
+
+, cte2 as ( 
+Select 
+    comments as frequency, 
+    count(id) as user_count
+    From cte 
+group by 1
+) 
+
+Select 
+    sum(user_count) over(order by frequency) as cum_total,
+        frequency
+    From cte2 
+
+
+
+https://www.interviewquery.com/questions/weighted-average-sales
+The sales department is conducting a performance review and is interested in trends in product sales. They have decided to use a weighted moving average as part of their analysis.
+Write a SQL query to calculate the 3-day weighted moving average of sales for each product. Use the weights 0.5 for the current day, 0.3 for the previous day, and 0.2 for the day before that.
+Note: Only output the weighted moving average for dates that have two or more preceding dates. You may assume that the table doesn’t skip dates.
+
+with cte as (
+    SELECT * ,
+    lag(sales_volume,1) over( partition by product_id 
+                             order by date) as pre_1_day,
+    lag(sales_volume,2) over( partition by product_id 
+                                order by date) as pre_2_day
+FROM sales
+)
+select 
+    date,
+    product_id,
+    (0.5 * sales_volume + 
+     0.3 * pre_1_day +
+     0.2 * pre_2_day) weighted_avg_sales 
+     from cte
+where pre_1_day is not null 
+and pre_2_day is not null
+
+
+
+https://www.interviewquery.com/questions/average-commute-time
+Let’s say you work at Uber. The rides table contains information about the trips of Uber users across America
+Write a query to get the average commute time (in minutes) for each commuter in New York (NY) and the average commute time (in minutes) across all commuters in New York.
+SELECT  
+    distinct 
+    commuter_id, 
+    floor(avg(TIMESTAMPDIFF(MINUTE, start_dt, end_dt)) over(partition by commuter_id)) as avg_commuter_time,
+    floor(avg(TIMESTAMPDIFF(MINUTE, start_dt, end_dt)) over()) as avg_time
+    FROM rides 
+    WHERE city = 'NY' 
+
+
+
 https://leetcode.com/problems/biggest-single-number/
 WITH cte as ( 
 Select 
@@ -187,7 +253,7 @@ SELECT
     , extract(HOUR FROM first_value(purchase_date) OVER (PARTITION BY user_id
                                                         ORDER BY user_id)) last_purchase_hour 
     , lead(quantity) OVER (PARTITION BY user_id
-                          ORDER BY purchase_date) as next_quantity 
+                           ORDER BY purchase_date) as next_quantity 
     , row_number() OVER (PARTITION BY user_id 
                          ORDER BY user_id) user_row_num 
     , dense_rank() OVER (ORDER BY user_id) user_row_num        
@@ -312,9 +378,10 @@ Select
 # Select top 10 records for each category
 SELECT rs.Field1,rs.Field2 
     FROM (
-        SELECT Field1,Field2, Rank() 
-          over (Partition BY Section 
-                ORDER BY RankCriteria DESC ) AS Rank
+        SELECT 
+             Field1,Field2, 
+             Rank() over (Partition BY Section 
+                            ORDER BY RankCriteria DESC ) AS Rank
         FROM table
         ) rs WHERE Rank <= 10
 

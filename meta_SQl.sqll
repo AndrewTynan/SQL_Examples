@@ -1,0 +1,97 @@
+
+shop_visibility
++------------+-----------+-----------------------------------------------+
+| column     | data_type | description                                   |
++------------+-----------+-----------------------------------------------+
+| profile_id | BIGINT    | Unique ID for a shop profile                  |
+| date       | DATE      | Day of visibility update in yyyy-mm-dd format |
+| ts         | TIMESTAMP | Time of visibility update                     |
+| visibility | INT       | Visibility: 0 (disabled) or 1 (visible)       |
++------------+-----------+-----------------------------------------------+
+
+
+Q1) Which are the 10 shop profiles that changed their visibility status the most?
+
+Select 
+  profile_id, 
+  count(ts) - 1 as visibility_changes 
+  From shop_visibility
+group by profile_id 
+order by count(ts) - 1 desc 
+limit 10 
+
+Q2) What percentage of shops are currently visible?
+
+With cte as (
+Select 
+  profile_id
+  max(ts) as last_ts
+  From shop_visibility 
+group by profile_id
+) 
+Select 
+  ROUND(1. COUNT(case when visibility = 1 then s.profile_id end) / COUNT(s.profile_id),2) as 
+  From shop_visibility s 
+  join  cte c 
+    on s.profile_id = c.profile_id 
+    and s.ts = c.last_ts
+
+
+shop_details:
++---------------+-----------+---------------------------------+
+| column        | data_type | description                     |
++---------------+-----------+---------------------------------+
+| profile_id    | BIGINT    | Unique ID for a profile         |
+| shop_category | VARCHAR   | Can take many values            |
+| visible_days  | BIGINT    | Number of days shop was visible |
+| creation_date | DATE      | Date on which shop was created  |
++---------------+-----------+---------------------------------+
+
+Q3) How are visible shops distributed across the different categories?
+
+With cte as (
+Select 
+  profile_id
+  max(ts) as last_ts
+  From shop_visibility 
+group by profile_id
+) 
+
+, cte2 as ( 
+Select 
+  coalesce(shop_category, 'No Category') as shop_category 
+  count(s.profile_id) as  profile_id_count 
+  From shop_visibility s 
+  join  cte c 
+    on s.profile_id = c.profile_id 
+    and s.ts = c.last_ts 
+  left join shop_details d 
+    on s.profile_id = d.profile_id
+  Where s.visibility = 1 
+group by 1
+) 
+Select 
+  shop_category, 
+  1. * profile_id_count / sum(profile_id_count) over() as profile_id_perc 
+  From cte2  
+
+
+Q4) We believe that over time, our new user base has shifted from profiles that had their shops visible most of the days to shops that are only visible for very few days. 
+How could you try to verify this with the data given to you?
+
+WITH cte as ( 
+Select 
+  profile_id, 
+  creation_date, 
+  visible_days / date_diff('day', creation_date, current_date) as percent_visible_days
+  From shop_details
+) 
+Select 
+  date_format(creation_date, '%Y-m') as creation_year_month, 
+  avg(percent_visible_days) as avg_percent_visible_days
+  From cte 
+group by 1 
+order by 1   
+
+
+

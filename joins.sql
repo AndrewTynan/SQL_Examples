@@ -1,6 +1,59 @@
 
+https://www.interviewquery.com/questions/rolling-bank-transactions
+We’re given a table of bank transactions with three columns, user_id, a deposit or withdrawal value (determined if the value is positive or negative), and created_at time for each transaction.
+Write a query to get the total three-day rolling average for deposits by day.
+Note: Please use the format '%Y-%m-%d' for the date in the outout
 
--- https://www.interviewquery.com/questions/avg-friend-requests-by-age-group
+WITH cte as ( 
+select  
+    date(created_at) as dt, 
+    sum(transaction_value) as transaction_value
+    from bank_transactions
+    Where transaction_value > 0 
+group by 1     
+) 
+
+Select 
+    b.dt,
+    AVG(a.transaction_value) AS rolling_three_day
+    From cte a
+    Join cte b
+       ON a.dt between DATE_ADD(b.dt, INTERVAL -3 DAY) and b.dt
+group by 1
+order by 1
+
+
+https://www.interviewquery.com/questions/paired-products
+Let’s say we have two tables, transactions and products. Hypothetically the transactions table consists of over a billion rows of purchases bought by users.
+We are trying to find paired products that are often purchased together by the same user, such as wine and bottle openers, chips and beer, etc..
+Write a query to find the top five paired products and their names.
+Notes: For the purposes of satisfying the test case, p2 should be the item that comes first in the alphabet. The qty column represents paired products count
+
+WITH purchases AS (
+    SELECT  
+       user_id
+       , created_at
+       , products.name 
+FROM transactions 
+JOIN products 
+    ON transactions.product_id = products.id 
+)
+SELECT 
+     t1.name AS p1
+   , t2.name AS p2
+   , count(*) as qty
+FROM purchases AS t1 
+JOIN purchases AS t2 
+    ON t1.user_id = t2.user_id 
+    AND t1.name < t2.name
+    AND t1.created_at = t2.created_at
+GROUP BY 1,2 
+ORDER BY  3 DESC, 2 ASC
+LIMIT 5
+
+
+
+https://www.interviewquery.com/questions/avg-friend-requests-by-age-group
 SELECT 
     age_group,
        ROUND(COUNT(requester_id)/
@@ -10,7 +63,36 @@ RIGHT JOIN age_groups a
     ON a.user_id = r.requester_id
 GROUP BY age_group
 ORDER BY average_acceptance DESC
-    
+
+
+WITH cte as ( 
+SELECT 
+    * 
+    , ou.*
+    ou.name as potential_friend_name,
+    COUNT(DISTINCT f.friend_id) * 3 as mutual_friends, 
+    COUNT(DISTINCT l.page_id)   * 2  as page_likes
+    FROM users 
+    JOIN users ou 
+        on u.user_id != ou.friend_id 
+    JOIN friends f 
+        ON u.user_id = f.user_id
+        AND ou.user_id = f.user_id 
+        AND ou.user_id != f.friend_id
+    JOIN likes l 
+        ON u.user_id = l.user_id
+        AND ou.user_id = l.user_id 
+    JOIN blocks b
+        ON u.user_id = b.user_id
+        AND ou.user_id != b.blocked_id
+    Where u.user_id = 3 
+group by ou.name 
+) 
+Select
+    potential_friend_name, 
+    SUM(mutual_friends + page_likes) as friendship_points
+    from cte 
+
 
 SELECT 
     u.user_id, 
@@ -23,13 +105,20 @@ SELECT
         ON u.user_id != ou.user_id 
     JOIN friends f 
         ON u.user_id = f.user_id
+
+
     Where u.user_id = 3 
 -- group by 1,2,3
 order by u.user_id, ou.user_id
-    
 
--- https://www.interviewquery.com/questions/released-patients
--- Write a query to find all dates where the hospital released more patients than the day prior.
+
+
+
+
+
+https://www.interviewquery.com/questions/released-patients
+Write a query to find all dates where the hospital released more patients than the day prior.
+
 Select 
     td.release_date, 
     td.released_patients
@@ -39,7 +128,7 @@ Select
         and td.released_patients > yd.released_patients 
 
 
--- https://leetcode.com/problems/rising-temperature/ 
+# https://leetcode.com/problems/rising-temperature/ 
 SELECT 
     w1.id
 FROM Weather w1, Weather w2
@@ -48,7 +137,7 @@ AND w1.temperature > w2.temperature
 
 
 -- Write a solution to report the name and bonus amount of each employee with a bonus less than 1000.
--- https://leetcode.com/problems/employee-bonus/
+# https://leetcode.com/problems/employee-bonus/
 Select  
     e.name, 
     b.bonus 
@@ -58,7 +147,7 @@ Select
     Where b.bonus < 1000 OR b.bonus is null ;
 
 
--- 570. Managers with at Least 5 Direct Reports (Leetcode)
+# 570. Managers with at Least 5 Direct Reports (Leetcode)
 Select 
     a.name
     From Employee a
@@ -68,7 +157,7 @@ group by b.managerId
 having count(distinct b.id) >= 5
 
 
--- https://leetcode.com/problems/average-selling-price/ 
+# https://leetcode.com/problems/average-selling-price/ 
 Select 
     p.product_id, 
     IFNULL(ROUND(SUM(units * price)/SUM(units),2),0) as average_price
@@ -80,7 +169,7 @@ Select
 group by 1
 
 
--- https://leetcode.com/problems/students-and-examinations/
+# https://leetcode.com/problems/students-and-examinations/
 -- good example of cross join 
 WITH student_subjects as ( 
 select 
@@ -111,7 +200,7 @@ Select
 order by student_id, subject_name
 
 
--- https://leetcode.com/problems/confirmation-rate/?envType=study-plan-v2&envId=top-sql-50
+#https://leetcode.com/problems/confirmation-rate/?envType=study-plan-v2&envId=top-sql-50
 select 
     s.user_id, 
     round(avg(if(c.action = 'confirmed', 1, 0)),2) as confirmation_rate
@@ -121,7 +210,7 @@ on s.user_id= c.user_id
 group by user_id;
 
 
--- https://www.interviewquery.com/questions/notification-deliveries
+# https://www.interviewquery.com/questions/notification-deliveries
 SELECT 
     total_pushes, 
     COUNT(*) AS frequency
@@ -136,12 +225,15 @@ FROM (
     WHERE u.conversion_date IS NOT NULL
     GROUP BY 1
 ) AS pushes
-GROUP BY 1 
+GROUP BY 1
 
 
--- https://www.interviewquery.com/questions/cumulative-distribution
+
+# https://www.interviewquery.com/questions/cumulative-distribution
 WITH hist AS (
-    SELECT users.id, COUNT(c.user_id) AS frequency
+    SELECT 
+            users.id, 
+            COUNT(c.user_id) AS frequency
     FROM users
     LEFT JOIN comments as c
         ON users.id = c.user_id
@@ -149,7 +241,9 @@ WITH hist AS (
 ),
 
 freq AS (
-    SELECT frequency, COUNT(*) AS num_users
+    SELECT 
+        frequency, 
+        COUNT(*) AS num_users
     FROM hist
     GROUP BY 1
 )
@@ -163,7 +257,7 @@ LEFT JOIN freq AS f2
 GROUP BY 1
 
 
--- https://www.interviewquery.com/questions/employee-salaries 
+# https://www.interviewquery.com/questions/employee-salaries 
 select 
     d.name as department_name,
     count(distinct e.id) as number_of_employees,
@@ -177,7 +271,7 @@ order by 3
 limit 3
 
 
--- https://www.interviewquery.com/questions/employee-salaries-etl-error 
+# https://www.interviewquery.com/questions/employee-salaries-etl-error 
 SELECT e.first_name, e.last_name, e.salary
 FROM employees AS e
 INNER JOIN (
@@ -188,7 +282,7 @@ INNER JOIN (
     ON e.id = m.max_id
 
 
--- https://www.interviewquery.com/questions/average-commute-time
+# https://www.interviewquery.com/questions/average-commute-time
 Select 
     a.commuter_id,
     a.avg_commuter_time, 
@@ -213,7 +307,7 @@ Select
     on a.city = b.city 
 
 
--- https://www.interviewquery.com/questions/cumulative-reset
+# https://www.interviewquery.com/questions/cumulative-reset
 WITH daily_total AS (
     SELECT 
         DATE(created_at) AS dt 
@@ -232,7 +326,7 @@ LEFT JOIN daily_total AS u
         AND YEAR(t.dt) = YEAR(u.dt)
 GROUP BY 1
 
--- note this could alos be done with a window function 
+# note this could alos be done with a window function 
 WITH cte as ( 
 select 
     YEAR(created_at) AS year,
@@ -247,10 +341,11 @@ Select
     sum(new_users) over(partition by year,month
                         order by date asc 
                         rows between unbounded preceding and current row) monthly_cumulative
-    from cte
+    from cte 
 
 
--- https://www.interviewquery.com/questions/department-expenses
+
+# -- https://www.interviewquery.com/questions/department-expenses
 WITH cte as ( 
 SELECT 
     d.name as department_name, 
@@ -272,7 +367,7 @@ order by total_expense desc
 
 
 
--- https://www.interviewquery.com/questions/rolling-bank-transactions
+# https://www.interviewquery.com/questions/rolling-bank-transactions
 WITH cte as ( 
 select  
     date(created_at) as dt, 
@@ -293,20 +388,31 @@ group by 1
 order by 1
 
 
--- https://www.interviewquery.com/questions/rolling-average-steps
+https://www.interviewquery.com/questions/rolling-average-steps
 SELECT 
     d1.user_id,
     d1.date,
+    -- d1.steps,
+    -- d2.date as d2_date,
+    -- d2.steps as d2_steps
+    -- count(d2.date) as window_date_count,
     round(avg(d2.steps)) as avg_steps
     FROM daily_steps d1 
     JOIN daily_steps d2 
         ON  d1.user_id = d2.user_id 
+        -- AND d2.date >= date_sub(d1.date, interval 2 day) 
+        -- AND d2.date <= d1.date
         AND d2.date between date_sub(d1.date, interval 2 day) and d1.date
+    -- where d1.date = '2023-01-04'
 group by 1,2
 having count(d2.date) = 3 
+-- order by 1,2,4 
 
 
--- https://www.interviewquery.com/questions/paired-products
+https://www.interviewquery.com/questions/paired-products
+We are trying to find paired products that are often purchased together by the same user, such as wine and bottle openers, chips and beer, etc..
+Write a query to find the top five paired products and their names.
+Notes: For the purposes of satisfying the test case, p2 should be the item that comes first in the alphabet. The qty column represents paired products count
 WITH purchases AS (
     SELECT  
        user_id
@@ -316,7 +422,6 @@ FROM transactions
 JOIN products 
     ON transactions.product_id = products.id 
 )
-    
 SELECT 
      t1.name AS p1
    , t2.name AS p2
@@ -329,33 +434,3 @@ JOIN purchases AS t2
 GROUP BY 1,2 
 ORDER BY  3 DESC, 2 ASC
 LIMIT 5
-
-
-WITH cte as ( 
-SELECT 
-    * 
-    , ou.*
-    ou.name as potential_friend_name,
-    COUNT(DISTINCT f.friend_id) * 3 as mutual_friends, 
-    COUNT(DISTINCT l.page_id)   * 2  as page_likes
-    FROM users 
-    JOIN users ou 
-        on u.user_id != ou.friend_id 
-    JOIN friends f 
-        ON u.user_id = f.user_id
-        AND ou.user_id = f.user_id 
-        AND ou.user_id != f.friend_id
-    JOIN likes l 
-        ON u.user_id = l.user_id
-        AND ou.user_id = l.user_id 
-    JOIN blocks b
-        ON u.user_id = b.user_id
-        AND ou.user_id != b.blocked_id
-    Where u.user_id = 3 
-group by ou.name 
-) 
-    
-Select
-    potential_friend_name, 
-    SUM(mutual_friends + page_likes) as friendship_points
-    from cte 
